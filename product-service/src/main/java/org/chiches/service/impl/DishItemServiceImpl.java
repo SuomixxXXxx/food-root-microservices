@@ -11,7 +11,6 @@ import org.chiches.exception.ResourceNotFoundException;
 import org.chiches.repository.CategoryRepository;
 import org.chiches.repository.DishItemRepository;
 import org.chiches.service.DishItemService;
-import org.chiches.service.StorageService;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
@@ -31,16 +30,13 @@ public class DishItemServiceImpl implements DishItemService {
     private final DishItemRepository dishItemRepository;
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
-    private final StorageService storageService;
 
     public DishItemServiceImpl(DishItemRepository dishItemRepository,
                                CategoryRepository categoryRepository,
-                               ModelMapper modelMapper,
-                               StorageService storageService) {
+                               ModelMapper modelMapper) {
         this.dishItemRepository = dishItemRepository;
         this.categoryRepository = categoryRepository;
         this.modelMapper = modelMapper;
-        this.storageService = storageService;
     }
 
     @Override
@@ -59,8 +55,8 @@ public class DishItemServiceImpl implements DishItemService {
             MultipartFile file = dishItemDTO.getFile();
             String name = String.format("dishes/%d.jpg", savedEntity.getId());
             if (file != null) {
-                String url = storageService.uploadFile(file, name);
-                savedDTO.setUrl(url);
+//                String url = storageService.uploadFile(file, name);
+//                savedDTO.setUrl(url);
             }
             return savedDTO;
         } catch (DataAccessException | PersistenceException e) {
@@ -110,8 +106,6 @@ public class DishItemServiceImpl implements DishItemService {
             MultipartFile file = dishItemDTO.getFile();
             String name = String.format("dishes/%d.jpg", dishItemEntity.getId());
             if (file != null) {
-                String url = storageService.uploadFile(file, name);
-                savedDishItemDTO.setUrl(url);
             }
             return savedDishItemDTO;
         } catch (DataAccessException | PersistenceException e) {
@@ -156,9 +150,7 @@ public class DishItemServiceImpl implements DishItemService {
         String url;
         String name = String.format("dishes/%d.jpg", fileUploadDTO.getId());
         if (file != null) {
-            url = storageService.uploadFile(file, name);
-            UrlDTO urlDTO = new UrlDTO(url);
-            return urlDTO;
+            return null;
         } else {
             throw new RuntimeException();
         }

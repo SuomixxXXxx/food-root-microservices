@@ -8,7 +8,7 @@ import org.chiches.exception.ResourceNotFoundException;
 import org.chiches.exception.file.InvalidFileFormatException;
 import org.chiches.repository.CategoryRepository;
 import org.chiches.service.CategoryService;
-import org.chiches.service.StorageService;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -24,14 +24,15 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
-    private final StorageService storageService;
+//    private final StorageService storageService;
 
     public CategoryServiceImpl(CategoryRepository categoryRepository,
-                               ModelMapper modelMapper,
-                               StorageService storageService) {
+                               ModelMapper modelMapper
+//            , StorageService storageService
+    ) {
         this.categoryRepository = categoryRepository;
         this.modelMapper = modelMapper;
-        this.storageService = storageService;
+//        this.storageService = storageService;
     }
 
     @Override
@@ -94,8 +95,8 @@ public class CategoryServiceImpl implements CategoryService {
             String contentType = previewPicture.getContentType();
             if (contentType != null && Arrays.asList("image/jpeg", "image/png").contains(contentType)) {
                 String name = String.format("categories/preview/%d.jpg", savedDTO.getId());
-                String url = storageService.uploadFile(previewPicture, name);
-                savedDTO.setPreviewPictureUrl(url);
+//                String url = storageService.uploadFile(previewPicture, name);
+//                savedDTO.setPreviewPictureUrl(url);
             } else {
                 throw new InvalidFileFormatException("File format not allowed: " + contentType);
             }
@@ -104,8 +105,8 @@ public class CategoryServiceImpl implements CategoryService {
             String contentType = mainPicture.getContentType();
             if (contentType != null && Arrays.asList("image/jpeg", "image/png").contains(contentType)) {
                 String name = String.format("categories/main/%d.jpg", savedDTO.getId());
-                String url = storageService.uploadFile(mainPicture, name);
-                savedDTO.setMainPictureUrl(url);
+//                String url = storageService.uploadFile(mainPicture, name);
+//                savedDTO.setMainPictureUrl(url);
             } else {
                 throw new InvalidFileFormatException("File format not allowed: " + contentType);
             }

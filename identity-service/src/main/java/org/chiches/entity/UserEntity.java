@@ -82,7 +82,7 @@ public class UserEntity extends BaseEntity implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.login;
+        return this.getId().toString();
     }
 
     @Override

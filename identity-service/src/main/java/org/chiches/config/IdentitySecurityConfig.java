@@ -15,7 +15,7 @@ public class IdentitySecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/.well-known/jwks.json").permitAll()
+                        .requestMatchers("/api/v1/auth/**", "/.well-known/jwks.json").permitAll()
                         .anyRequest().authenticated());
         return http.build();
     }

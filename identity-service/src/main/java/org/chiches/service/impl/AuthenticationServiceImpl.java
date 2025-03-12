@@ -22,43 +22,56 @@ import java.util.List;
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
-    private final JwtServiceOld jwtServiceOld;
+    private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
     private final PasswordEncoder passwordEncoder;
     private final AuthorityRepository authorityRepository;
 
     public AuthenticationServiceImpl(UserRepository userRepository,
                                      AuthenticationManager authenticationManager,
-                                     JwtServiceOld jwtServiceOld,
+                                     JwtService jwtService,
                                      RefreshTokenService refreshTokenService,
                                      PasswordEncoder passwordEncoder,
                                      AuthorityRepository authorityRepository) {
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
-        this.jwtServiceOld = jwtServiceOld;
+        this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
         this.passwordEncoder = passwordEncoder;
         this.authorityRepository = authorityRepository;
     }
 
-//    @Override
+    @Override
     public TokenDTO authenticate(String email, String password) {
+        // Create an authentication token from email and password.
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(email, password);
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String token = jwtServiceOld.generateToken(userDetails);
-        RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(userDetails.getUsername());
-        return new TokenDTO(token, refreshToken.getToken());
+
+        // Retrieve the authenticated user details.
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        // Generate a JWT token using the new JwtService.
+        String token = jwtService.generateToken(userDetails);
+
+        // Create a refresh token (unchanged logic).
+//        RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(userDetails.getUsername());
+
+        return new TokenDTO(token, "refreshToken.getToken()");
     }
 
-//    @Override
+    @Override
     public TokenDTO register(UserDTO userDto) {
+        // Check if a user with the same login already exists.
         if (userRepository.existsByLogin(userDto.getLogin())) {
             throw new IllegalArgumentException("User with login " + userDto.getLogin() + " already exists");
         }
+
+        // Load the default authorities (e.g. "USER").
         List<AuthorityEntity> defaultAuthorities = authorityRepository.findByAuthorityContainingIgnoreCase("user");
+
+        // Create and save a new user.
         UserEntity userEntity = new UserEntity(
                 userDto.getLogin(),
                 passwordEncoder.encode(userDto.getPassword()),
@@ -67,19 +80,24 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 defaultAuthorities
         );
         userRepository.save(userEntity);
-        String token = jwtServiceOld.generateToken(userEntity);
-        RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(userEntity.getLogin());
-        return new TokenDTO(token, refreshToken.getToken());
+
+        // Generate a JWT token using the new JwtService.
+        String token = jwtService.generateToken(userEntity);
+
+        // Create a refresh token for the new user.
+//        RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(userEntity.getLogin());
+
+        return new TokenDTO(token, "refreshToken.getToken()");
     }
 
-//    @Override
-    public TokenDTO refresh(String refreshToken) {
-        RefreshTokenEntity refreshTokenEntity = refreshTokenService.verifyExpiration(refreshToken);
-        if (refreshTokenEntity == null) {
-            throw new IllegalArgumentException("Refresh token is expired");
-        }
-        UserEntity userEntity = refreshTokenEntity.getUser();
-        String token = jwtServiceOld.generateToken(userEntity);
-        return new TokenDTO(token, refreshToken);
-    }
+////    @Override
+//    public TokenDTO refresh(String refreshToken) {
+//        RefreshTokenEntity refreshTokenEntity = refreshTokenService.verifyExpiration(refreshToken);
+//        if (refreshTokenEntity == null) {
+//            throw new IllegalArgumentException("Refresh token is expired");
+//        }
+//        UserEntity userEntity = refreshTokenEntity.getUser();
+//        String token = jwtServiceOld.generateToken(userEntity);
+//        return new TokenDTO(token, refreshToken);
+//    }
 }
