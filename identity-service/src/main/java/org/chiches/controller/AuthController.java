@@ -49,4 +49,8 @@ public class AuthController {
         cookieUtil.logout(response);
         return ResponseEntity.ok().build();
     }
+    @GetMapping("/service")
+    public ResponseEntity<String> getServiceToken(@RequestParam String service, @RequestParam String secret) {
+        return ResponseEntity.ok(authenticationService.serviceToken(service, secret));
+    }
 }

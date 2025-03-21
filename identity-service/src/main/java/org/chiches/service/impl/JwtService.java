@@ -32,6 +32,17 @@ public class JwtService {
         }
         return generateToken(claims, userDetails);
     }
+    public String generateServiceToken(String serviceName, List<String> authorities) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", authorities.toArray());
+        return Jwts.builder()
+                .claims(claims)
+                .subject(serviceName)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + (1000L * 60L * 3000L))) // 30 minutes
+                .signWith(keyPair.getPrivate())
+                .compact();
+    }
 
     private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder()

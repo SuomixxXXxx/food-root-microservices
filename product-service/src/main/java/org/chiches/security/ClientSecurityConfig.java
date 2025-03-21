@@ -40,7 +40,7 @@ public class ClientSecurityConfig {
                 .build();
     }
 
-    @Bean
+//    @Bean
     @LoadBalanced
     public RestTemplate loadBalancedRestTemplate() {
         return new RestTemplate();

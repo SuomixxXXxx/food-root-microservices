@@ -3,11 +3,11 @@ package org.chiches.service.impl;
 import org.chiches.dto.TokenDTO;
 import org.chiches.dto.UserDTO;
 import org.chiches.entity.AuthorityEntity;
-import org.chiches.entity.RefreshTokenEntity;
 import org.chiches.entity.UserEntity;
 import org.chiches.repository.AuthorityRepository;
 import org.chiches.repository.UserRepository;
 import org.chiches.service.AuthenticationService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,6 +20,8 @@ import java.util.List;
 
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
+    @Value("${service.secret}")
+    private String serviceSecret;
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
@@ -43,19 +45,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public TokenDTO authenticate(String email, String password) {
-        // Create an authentication token from email and password.
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(email, password);
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Retrieve the authenticated user details.
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        // Generate a JWT token using the new JwtService.
         String token = jwtService.generateToken(userDetails);
 
-        // Create a refresh token (unchanged logic).
 //        RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(userDetails.getUsername());
 
         return new TokenDTO(token, "refreshToken.getToken()");
@@ -63,15 +61,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public TokenDTO register(UserDTO userDto) {
-        // Check if a user with the same login already exists.
         if (userRepository.existsByLogin(userDto.getLogin())) {
             throw new IllegalArgumentException("User with login " + userDto.getLogin() + " already exists");
         }
-
-        // Load the default authorities (e.g. "USER").
         List<AuthorityEntity> defaultAuthorities = authorityRepository.findByAuthorityContainingIgnoreCase("user");
 
-        // Create and save a new user.
         UserEntity userEntity = new UserEntity(
                 userDto.getLogin(),
                 passwordEncoder.encode(userDto.getPassword()),
@@ -81,13 +75,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         );
         userRepository.save(userEntity);
 
-        // Generate a JWT token using the new JwtService.
         String token = jwtService.generateToken(userEntity);
 
-        // Create a refresh token for the new user.
 //        RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(userEntity.getLogin());
 
         return new TokenDTO(token, "refreshToken.getToken()");
+    }
+
+    @Override
+    public String serviceToken(String service, String secret) {
+        if (!serviceSecret.equals(secret)) {
+            throw new IllegalArgumentException("Invalid secret");
+        }
+        List<String> authorities = List.of("service");
+        String token = jwtService.generateServiceToken(service, authorities);
+        return token;
     }
 
 ////    @Override

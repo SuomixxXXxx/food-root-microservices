@@ -20,7 +20,8 @@ public class AuthorityInitializer implements CommandLineRunner {
             "staff::delete",
             "admin::read",
             "admin::write",
-            "admin::delete"
+            "admin::delete",
+            "service"
     };
     public AuthorityInitializer(AuthorityRepository authorityRepository, UserRepository userRepository) {
         this.authorityRepository = authorityRepository;
