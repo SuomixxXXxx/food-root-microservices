@@ -17,8 +17,6 @@
     public class ClientSecurityConfig {
         // FIXME: Prod only
         private static final String JWKS_URI = "http://identity-service/.well-known/jwks.json";
-        private static final String JWT_COOKIE_NAME = "jwtToken";
-        private static final String BEARER_PREFIX = "Bearer_";
 
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -27,7 +25,6 @@
                             .requestMatchers("/api/v1/**").permitAll()
                             .anyRequest().authenticated())
                     .oauth2ResourceServer(oauth2 -> oauth2
-                            .bearerTokenResolver(new CookieBearerTokenResolver(JWT_COOKIE_NAME, BEARER_PREFIX))
                             .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                     );
             return http.build();
@@ -40,7 +37,7 @@
                     .build();
         }
 
-    //    @Bean
+        @Bean
         @LoadBalanced
         public RestTemplate loadBalancedRestTemplate() {
             return new RestTemplate();
