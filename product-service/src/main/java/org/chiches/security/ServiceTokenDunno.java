@@ -1,5 +1,7 @@
 package org.chiches.security;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -18,7 +20,7 @@ public class ServiceTokenDunno {
     @Qualifier("load-balanced")
     private final RestTemplate restTemplate;
     private final TokenHolder tokenHolder;
-
+    private final static Logger logger = LoggerFactory.getLogger(ServiceTokenDunno.class);
     public ServiceTokenDunno(
             RestTemplate restTemplate,
             TokenHolder tokenHolder) {
@@ -32,7 +34,7 @@ public class ServiceTokenDunno {
 
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
         tokenHolder.setToken(response.getBody());
-        System.out.println("Token fetched: " + response.getBody());
+        logger.debug("Token fetched: {}", response.getBody());
     }
 //    @LoadBalanced
 //    public RestTemplate loadBalancedRestTemplate() {
