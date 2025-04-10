@@ -23,5 +23,5 @@ public interface DishItemService {
     void delete(Long id);
 
     UrlDTO uploadImage(FileUploadDTO fileUploadDTO);
-
+    List<DishItemDTO> findPricesByIds(List<Long> ids);
 }

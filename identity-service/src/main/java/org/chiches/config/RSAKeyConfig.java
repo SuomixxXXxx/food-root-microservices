@@ -34,7 +34,6 @@ public class RSAKeyConfig {
     }
 
     private void saveKeyPair(KeyPair keyPair) throws IOException {
-        // Save Private Key
         try (FileWriter writer = new FileWriter(PRIVATE_KEY_FILE)) {
             byte[] privKeyBytes = keyPair.getPrivate().getEncoded();
             writer.write("-----BEGIN PRIVATE KEY-----\n");
@@ -42,7 +41,6 @@ public class RSAKeyConfig {
             writer.write("\n-----END PRIVATE KEY-----\n");
         }
 
-        // Save Public Key
         try (FileWriter writer = new FileWriter(PUBLIC_KEY_FILE)) {
             byte[] pubKeyBytes = keyPair.getPublic().getEncoded();
             writer.write("-----BEGIN PUBLIC KEY-----\n");
@@ -52,7 +50,6 @@ public class RSAKeyConfig {
     }
 
     private KeyPair loadKeyPair() throws Exception {
-        // Load Private Key
         String privateKeyPem = Files.readString(Path.of(PRIVATE_KEY_FILE))
                 .replaceAll("-----\\w+ PRIVATE KEY-----", "")
                 .replaceAll("\\s", "");
@@ -62,7 +59,6 @@ public class RSAKeyConfig {
         KeyFactory kf = KeyFactory.getInstance("RSA");
         PrivateKey privateKey = kf.generatePrivate(keySpec);
 
-        // Load Public Key
         String publicKeyPem = Files.readString(Path.of(PUBLIC_KEY_FILE))
                 .replaceAll("-----\\w+ PUBLIC KEY-----", "")
                 .replaceAll("\\s", "");

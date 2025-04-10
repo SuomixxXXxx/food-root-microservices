@@ -56,7 +56,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 //        RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(userDetails.getUsername());
 
-        return new TokenDTO(token, "refreshToken.getToken()");
+        return new TokenDTO(token, null);
     }
 
     @Override

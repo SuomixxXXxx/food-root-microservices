@@ -9,10 +9,8 @@ import org.chiches.exception.file.InvalidFileFormatException;
 import org.chiches.repository.CategoryRepository;
 import org.chiches.service.CategoryService;
 
+import org.chiches.service.StorageService;
 import org.modelmapper.ModelMapper;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,21 +22,20 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
-//    private final StorageService storageService;
+    private final StorageService storageService;
 
     public CategoryServiceImpl(CategoryRepository categoryRepository,
-                               ModelMapper modelMapper
-//            , StorageService storageService
-    ) {
+                               ModelMapper modelMapper,
+                               StorageService storageService) {
         this.categoryRepository = categoryRepository;
         this.modelMapper = modelMapper;
-//        this.storageService = storageService;
+        this.storageService = storageService;
     }
 
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = "categories", allEntries = true)
-    })
+//    @Caching(evict = {
+//            @CacheEvict(value = "categories", allEntries = true)
+//    })
     public CategoryDTO createCategory(CategoryDTO categoryDTO, MultipartFile previewPicture, MultipartFile mainPicture) {
         try {
             CategoryEntity categoryEntity = modelMapper.map(categoryDTO, CategoryEntity.class);
@@ -48,16 +45,18 @@ public class CategoryServiceImpl implements CategoryService {
             throw new DatabaseException("Category was not created due to DB connection issues");
         }
     }
+
     @Override
-    @Cacheable("category")
+//    @Cacheable("category")
     public CategoryDTO findById(Long id) {
         CategoryEntity categoryEntity = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category with id " + id + " not found"));
         CategoryDTO categoryDTO = modelMapper.map(categoryEntity, CategoryDTO.class);
         return categoryDTO;
     }
+
     @Override
-    @Cacheable(value = "categories", key = "#active")
+//    @Cacheable(value = "categories", key = "#active")
     public List<CategoryDTO> findAll(boolean active) {
         List<CategoryEntity> categoryEntities;
         if (active) {
@@ -71,11 +70,12 @@ public class CategoryServiceImpl implements CategoryService {
                 .toList();
         return categoryDTOs;
     }
+
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = "category", key = "#categoryDTO.id"),
-            @CacheEvict(value = "categories", allEntries = true)
-    })
+//    @Caching(evict = {
+//            @CacheEvict(value = "category", key = "#categoryDTO.id"),
+//            @CacheEvict(value = "categories", allEntries = true)
+//    })
     public CategoryDTO updateCategory(CategoryDTO categoryDTO, MultipartFile previewPicture, MultipartFile mainPicture) {
         CategoryEntity categoryEntity = categoryRepository.findById(categoryDTO.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
@@ -95,8 +95,8 @@ public class CategoryServiceImpl implements CategoryService {
             String contentType = previewPicture.getContentType();
             if (contentType != null && Arrays.asList("image/jpeg", "image/png").contains(contentType)) {
                 String name = String.format("categories/preview/%d.jpg", savedDTO.getId());
-//                String url = storageService.uploadFile(previewPicture, name);
-//                savedDTO.setPreviewPictureUrl(url);
+                String url = storageService.uploadFile(previewPicture, name);
+                savedDTO.setPreviewPictureUrl(url);
             } else {
                 throw new InvalidFileFormatException("File format not allowed: " + contentType);
             }
@@ -105,8 +105,8 @@ public class CategoryServiceImpl implements CategoryService {
             String contentType = mainPicture.getContentType();
             if (contentType != null && Arrays.asList("image/jpeg", "image/png").contains(contentType)) {
                 String name = String.format("categories/main/%d.jpg", savedDTO.getId());
-//                String url = storageService.uploadFile(mainPicture, name);
-//                savedDTO.setMainPictureUrl(url);
+                String url = storageService.uploadFile(mainPicture, name);
+                savedDTO.setMainPictureUrl(url);
             } else {
                 throw new InvalidFileFormatException("File format not allowed: " + contentType);
             }

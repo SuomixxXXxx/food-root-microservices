@@ -36,12 +36,6 @@ public class AuthController {
 
         TokenDTO tokenDTO = authenticationService.authenticate(login, password);
 
-        Cookie jwtToken = cookieUtil.createJWTCookie(tokenDTO.getToken());
-        response.addCookie(jwtToken);
-
-        Cookie refreshToken = cookieUtil.createRefreshCookie(tokenDTO.getRefreshToken());
-        response.addCookie(refreshToken);
-
         return ResponseEntity.ok(tokenDTO);
     }
     @PostMapping("/logout")

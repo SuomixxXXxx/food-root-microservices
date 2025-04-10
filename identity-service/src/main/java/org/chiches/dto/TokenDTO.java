@@ -1,5 +1,8 @@
 package org.chiches.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TokenDTO {
     // не нужно тк такое только на выходе
     private String token;
